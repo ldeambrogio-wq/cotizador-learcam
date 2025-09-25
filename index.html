@@ -1,1019 +1,377 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotizador Dinámico - Learcam</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(45deg, #2c3e50, #3498db);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 45% 55%;
-            gap: 0;
-            min-height: 600px;
-        }
-
-        .form-section {
-            padding: 30px;
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            overflow-y: auto;
-        }
-
-        .results-section {
-            padding: 30px;
-            background: white;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #3498db;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            transform: scale(1.2);
-        }
-
-        .form-category {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .form-category h3 {
-            color: #3498db;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-category h3::before {
-            content: "📊";
-            font-size: 1.1rem;
-        }
-
-        small {
-            display: block;
-            margin-top: 3px;
-            font-style: italic;
-            color: #6c757d;
-            font-size: 0.85em;
-        }
-
-        .calculate-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .calculate-btn:hover {
-            background: linear-gradient(45deg, #2980b9, #1e6b96);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-        }
-
-        .results-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .result-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 5px solid #3498db;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .result-card h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .result-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .result-value.negative {
-            color: #e74c3c;
-        }
-
-        .result-breakdown {
-            margin-bottom: 25px;
-            padding: 25px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-radius: 15px;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .result-breakdown h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .breakdown-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f3f4;
-        }
-
-        .breakdown-item:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            color: #2c3e50;
-            border-top: 2px solid #3498db;
-            padding-top: 15px;
-            margin-top: 10px;
-        }
-
-        .breakdown-label {
-            color: #6c757d;
-            font-size: 0.95rem;
-        }
-
-        .breakdown-value {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 1rem;
-        }
-
-        .summary-metrics {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .metric-card {
-            text-align: center;
-            padding: 25px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .metric-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-value {
-            font-size: 1.6rem;
-            font-weight: bold;
-        }
-
-        .semaforo-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 15px;
-        }
-
-        .semaforo-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            opacity: 0.3;
-            min-width: 80px;
-        }
-
-        .semaforo-aprobar {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-        }
-
-        .semaforo-revisar {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-        }
-
-        .semaforo-rechazar {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        .semaforo-activo {
-            opacity: 1;
-            border-color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transform: scale(1.02);
-        }
-
-        .semaforo-icon {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-
-        .semaforo-text {
-            font-size: 0.75rem;
-        }
-
-        .alertas-container {
-            margin-bottom: 25px;
-        }
-
-        .alerta {
-            padding: 15px 18px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .alerta-critica {
-            background: #ffeaea;
-            border-left: 4px solid #e74c3c;
-            color: #c0392b;
-        }
-
-        .alerta-atencion {
-            background: #fff3cd;
-            border-left: 4px solid #f39c12;
-            color: #856404;
-        }
-
-        .alerta-oportunidad {
-            background: #d4edda;
-            border-left: 4px solid #27ae60;
-            color: #155724;
-        }
-
-        .escenarios-container {
-            margin-top: 20px;
-        }
-
-        .escenario-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-        }
-
-        .escenario-header {
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #2c3e50;
-        }
-
-        .escenario-metricas {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            font-size: 0.85rem;
-        }
-
-        .escenario-metrica {
-            text-align: center;
-            padding: 8px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-        }
-
-        .escenario-label {
-            font-size: 0.75rem;
-            color: #6c757d;
-            margin-bottom: 4px;
-        }
-
-        .escenario-value {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .escenario-value.negativo {
-            color: #e74c3c;
-        }
-
-        .config-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 8px;
-            margin-bottom: 6px;
-            align-items: center;
-        }
-
-        .config-row label {
-            font-size: 0.8rem;
-            color: #495057;
-        }
-
-        .config-row input {
-            padding: 5px 6px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-section {
-                border-right: none;
-                border-bottom: 1px solid #dee2e6;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .semaforo-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-
-        .warning {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ffeaa7;
-            margin-bottom: 20px;
-        }
-
-        .success {
-            background: #d1edff;
-            color: #0c5460;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #bee5eb;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cotizador Dinámico - Learcam V19</title>
+  <style>
+    :root{
+      --bg-grad-a:#667eea;
+      --bg-grad-b:#764ba2;
+      --primary:#3498db;
+      --primary-dark:#2c3e50;
+      --surface:#f8f9fa;
+      --border:#dee2e6;
+      --muted:#6b7280;
+      --ok:#2ecc71;
+      --warn:#e67e22;
+      --bad:#e74c3c;
+      --chip-bg:#eef2ff;
+      --chip-bd:#cfd8ff;
+      --chip-fg:#2c3e50;
+      --kpi-bd:#e9eefc;
+      --kpi-bg:#ffffff;
+      --headline:#2c3e50;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Segoe UI',Tahoma,sans-serif;
+      background:linear-gradient(135deg,var(--bg-grad-a) 0%,var(--bg-grad-b) 100%);
+      min-height:100vh;padding:20px;color:#111827
+    }
+    .container{
+      max-width:1400px;margin:0 auto;background:#fff;border-radius:20px;
+      box-shadow:0 16px 32px rgba(0,0,0,.08);overflow:hidden
+    }
+    .header{
+      background:linear-gradient(45deg,var(--primary-dark),var(--primary));
+      color:#fff;padding:22px;text-align:center
+    }
+    .header h1{font-size:2rem;margin-bottom:4px;font-weight:800;letter-spacing:.2px}
+    .header p{opacity:.9}
+    .main-content{display:grid;grid-template-columns:30% 70%;min-height:600px}
+    /* IZQUIERDA */
+    .form-section{padding:20px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto}
+    details{
+      margin-bottom:14px;border:1px solid #ddd;border-radius:10px;background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.04); transition:box-shadow .2s ease
+    }
+    details[open]{box-shadow:0 4px 12px rgba(0,0,0,.06)}
+    summary{
+      padding:12px 16px;font-weight:700;cursor:pointer;
+      background:var(--primary);color:#fff;border-radius:10px 10px 0 0;
+      display:flex;align-items:center;gap:8px
+    }
+    summary::marker{content:""}
+    .form-group{padding:12px 16px}
+    .form-group label{display:block;margin-bottom:6px;font-size:.9rem;color:var(--headline)}
+    .form-group input{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:.95rem}
+    /* DERECHA */
+    .results-section{padding:24px;background:#fff;overflow-y:auto}
+    .section-title{font-size:1.4rem;margin-bottom:14px;color:var(--headline);font-weight:800}
+    .semaforo-container{display:flex;justify-content:center;gap:16px;margin-bottom:10px}
+    .semaforo-item{
+      display:flex;flex-direction:column;align-items:center;
+      padding:10px 14px;border-radius:12px;min-width:92px;
+      font-weight:800;color:#fff;opacity:.4;letter-spacing:.2px
+    }
+    .semaforo-aprobar{background:linear-gradient(135deg,#27ae60,#2ecc71)}
+    .semaforo-revisar{background:linear-gradient(135deg,#f39c12,#e67e22)}
+    .semaforo-rechazar{background:linear-gradient(135deg,#e74c3c,#c0392b)}
+    .semaforo-activo{opacity:1;box-shadow:0 0 0 3px rgba(0,0,0,.06) inset,0 10px 18px rgba(0,0,0,.15)}
+    .alertas-container{margin:12px 0}
+    .alerta{padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:.92rem}
+    .critica{background:#ffeaea;border:1px solid #ffd2d2;color:#a11e2a}
+    .atencion{background:#fff8e1;border:1px solid #ffe7ad;color:#7a5a00}
+    .oportunidad{background:#e8f5e9;border:1px solid #c8e6c9;color:#235d2a}
+    .summary-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0 22px}
+    .metric-card{
+      background:linear-gradient(135deg,#6d7fe9,#7b6ad6);
+      color:#fff;padding:18px;border-radius:12px;text-align:center;
+      box-shadow:0 6px 16px rgba(102,126,234,.18)
+    }
+    .metric-label{font-size:.85rem;margin-bottom:4px;opacity:.95}
+    .metric-value{font-size:1.25rem;font-weight:900;letter-spacing:.2px;font-variant-numeric:tabular-nums}
+    .card{
+      background:var(--surface);border-radius:12px;padding:18px;
+      border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);
+      margin-bottom:18px
+    }
+    .card h3{margin-bottom:10px;font-size:1.05rem;color:var(--primary-dark);font-weight:800;letter-spacing:.2px}
+    .er-table{width:100%;border-collapse:collapse;margin-top:6px}
+    .er-table th,.er-table td{padding:8px;border-bottom:1px solid #e8e8e8;text-align:right}
+    .er-table th{background:#edf6ff;color:var(--headline);font-weight:800}
+    .er-table td.label{text-align:left}
+    .er-total{font-weight:800;background:#f6f7fb}
+    .er-final{font-weight:900;background:#4caf50;color:#fff}
+    .er-final.neg{background:#f44336}
+    .breakdown-item{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0}
+    /* ——— FORMA DE PAGO (alineada al resto) ——— */
+    .paycard{
+      background:linear-gradient(135deg,#ffffff 0%,#f7faff 100%);
+      border:1px solid var(--kpi-bd);border-radius:14px;padding:14px;
+      box-shadow:0 6px 18px rgba(52,152,219,.08)
+    }
+    .pay-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+    .pay-title{
+      font-weight:800;color:var(--headline);font-size:1.05rem;letter-spacing:.2px;
+      display:flex;gap:8px;align-items:center
+    }
+    .pay-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{
+      font-size:.82rem;padding:4px 10px;border-radius:999px;border:1px solid var(--chip-bd);
+      background:var(--chip-bg);color:var(--chip-fg);font-weight:700
+    }
+    .pay-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+    .kpi{
+      background:var(--kpi-bg);border:1px solid var(--kpi-bd);border-radius:10px;padding:10px;text-align:center
+    }
+    .kpi .label{font-size:.8rem;color:var(--muted);margin-bottom:6px}
+    .kpi .value{
+      font-size:1.02rem;font-weight:900;color:#111827;letter-spacing:.2px;font-variant-numeric:tabular-nums
+    }
+    .pay-progress{margin-top:10px;height:6px;border-radius:999px;background:#e9eefc;overflow:hidden}
+    .pay-progress .adv{height:100%;background:linear-gradient(90deg,#22c55e,#86efac)}
+    @media(max-width:1100px){.pay-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:900px){.main-content{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💼 Cotizador Learcam</h1>
-            <p>Sistema de análisis de contribución y rentabilidad comercial</p>
-        </div>
-
-        <div class="main-content">
-            <div class="form-section">
-                <h2 class="section-title">📝 Datos de la Operación</h2>
-                
-                <div class="form-category">
-                    <h3>Variables de la Operación</h3>
-                    <div class="form-group">
-                        <label for="valorFOB">Valor FOB (USD):</label>
-                        <input type="number" id="valorFOB" step="0.01" value="27000">
-                    </div>
-                    <div class="form-group">
-                        <label for="valorVenta">Valor de Venta con IVA (USD):</label>
-                        <input type="number" id="valorVenta" step="0.01" value="48288">
-                    </div>
-                    <div class="form-group">
-                        <label for="anticipo">Anticipo (%):</label>
-                        <input type="number" id="anticipo" step="0.1" value="30">
-                    </div>
-                    <div class="form-group">
-                        <label for="cuotas">Cantidad de Cuotas:</label>
-                        <input type="number" id="cuotas" step="1" value="8">
-                    </div>
-                    <div class="form-group">
-                        <label for="tasaFinanciacion">Tasa de Financiación Anual (%):</label>
-                        <input type="number" id="tasaFinanciacion" step="0.1" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="tasaDescuento">Tasa de Descuento Anual (%):</label>
-                        <input type="number" id="tasaDescuento" step="0.1" value="40">
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="ventaDistribuidor" checked>
-                            <label for="ventaDistribuidor">¿Venta realizada por distribuidor?</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-category">
-                    <h3>Configuración del Modelo de Negocio</h3>
-                    <div class="form-group">
-                        <label for="gastosFijos">Gastos Fijos Mensuales (USD):</label>
-                        <input type="number" id="gastosFijos" step="0.01" value="24500">
-                    </div>
-                    <div class="form-group">
-                        <label for="iva">IVA (%):</label>
-                        <input type="number" id="iva" step="0.1" value="10.5">
-                    </div>
-                    <div class="form-group">
-                        <label for="comisionConcesionario">Comisión Concesionario (%):</label>
-                        <input type="number" id="comisionConcesionario" step="0.1" value="10">
-                    </div>
-                </div>
-
-                <div class="form-category">
-                    <h3>Gastos Variables</h3>
-                    <div class="form-group">
-                        <label for="despachantePorcentaje">Despachante de Aduana (%):</label>
-                        <input type="number" id="despachantePorcentaje" step="0.1" value="1.5">
-                        <small>Calculado sobre FOB + Flete + Seguro</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="flete">Flete Caxias / Pilar (USD):</label>
-                        <input type="number" id="flete" step="0.01" value="2000">
-                    </div>
-                    <div class="form-group">
-                        <label for="seguroPorcentaje">Seguro Mercadería (%):</label>
-                        <input type="number" id="seguroPorcentaje" step="0.1" value="1.5">
-                        <small>Calculado sobre FOB + Flete + Seguro</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="gastosVariosPorcentaje">Gastos Varios / Comisiones Comerciales (%):</label>
-                        <input type="number" id="gastosVariosPorcentaje" step="0.1" value="2.0">
-                        <small>Calculado sobre FOB + Flete + Seguro</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="ingBrutosPercepcionPorcentaje">Ingresos Brutos Percepción (%):</label>
-                        <input type="number" id="ingBrutosPercepcionPorcentaje" step="0.1" value="3.0">
-                        <small>Calculado sobre FOB + Flete + Seguro</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="ingBrutosSaldoPorcentaje">Impuesto Ingresos Brutos Saldo (%):</label>
-                        <input type="number" id="ingBrutosSaldoPorcentaje" step="0.1" value="3.5">
-                        <small>Calculado sobre Venta sin IVA menos Percepción</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="tasaSeguridad">Tasa de Seguridad (USD):</label>
-                        <input type="number" id="tasaSeguridad" step="0.01" value="75">
-                    </div>
-                </div>
-
-                <button class="calculate-btn" onclick="calcular()">🔄 Calcular Análisis</button>
-            </div>
-
-            <div class="results-section">
-                <h2 class="section-title">📊 Análisis de Contribución</h2>
-                <div id="resultados">
-                    <div class="warning">
-                        <strong>💡 Información:</strong> Complete los datos del formulario y haga clic en "Calcular Análisis" para ver los resultados.
-                    </div>
-                </div>
-                
-                <!-- Configuración de Alertas movida aquí -->
-                <div class="form-category" style="margin-top: 30px;">
-                    <h3>⚙️ Configuración de Alertas</h3>
-                    <div class="config-row">
-                        <label>Margen Neto Mínimo (%):</label>
-                        <input type="number" id="alertaMargenMinimo" step="0.1" value="15">
-                    </div>
-                    <div class="config-row">
-                        <label>Punto Equilibrio Máximo (unidades):</label>
-                        <input type="number" id="alertaEquilibrioMaximo" step="0.1" value="20">
-                    </div>
-                    <div class="config-row">
-                        <label>Margen Bruto Excelente (%):</label>
-                        <input type="number" id="alertaMargenExcelente" step="0.1" value="30">
-                    </div>
-                    <div class="config-row">
-                        <label>Tasa Descuento Crítica (%):</label>
-                        <input type="number" id="alertaTasaCritica" step="0.1" value="35">
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>💼 Cotizador Learcam V19</h1>
+      <p>Sistema de análisis de contribución y rentabilidad</p>
     </div>
 
-    <script>
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 2
-            }).format(amount);
-        }
+    <div class="main-content">
+      <!-- IZQUIERDA -->
+      <div class="form-section">
+        <details open>
+          <summary>📝 Variables de la Operación</summary>
+          <div class="form-group"><label>Valor FOB (USD)</label><input type="number" id="valorFOB" value="27000"></div>
+          <div class="form-group"><label>Valor de Venta con IVA (USD)</label><input type="number" id="valorVenta" value="48288"></div>
+          <div class="form-group"><label>Anticipo (%)</label><input type="number" id="anticipo" value="30"></div>
+          <div class="form-group"><label>Cantidad de Cuotas</label><input type="number" id="cuotas" value="8"></div>
+          <div class="form-group"><label>Tasa Financiación Anual (%)</label><input type="number" id="tasaFinanciacion" value="0"></div>
+          <div class="form-group"><label>Tasa Descuento Anual (%)</label><input type="number" id="tasaDescuento" value="40"></div>
+          <div class="form-group"><label><input type="checkbox" id="ventaDistribuidor" checked> ¿Venta por distribuidor?</label></div>
+        </details>
 
-        function formatPercentage(value) {
-            return `${value.toFixed(2)}%`;
-        }
+        <details>
+          <summary>⚙️ Configuración del Modelo</summary>
+          <div class="form-group"><label>Gastos Fijos Mensuales (USD)</label><input type="number" id="gastosFijos" value="24500"></div>
+          <div class="form-group"><label>IVA (%)</label><input type="number" id="iva" value="10.5"></div>
+          <div class="form-group"><label>Comisión Concesionario (%)</label><input type="number" id="comisionConcesionario" value="10"></div>
+        </details>
 
-        function generarEscenarios(calc) {
-            const escenarioBase = {
-                nombre: "📊 Escenario Base",
-                contribucion: calc.contribucionNeta,
-                margenNeto: calc.margenNetoPorcentaje,
-                puntoEquilibrio: calc.puntoEquilibrio
-            };
-            
-            const ventaOptimista = calc.ventaNeta * 1.2;
-            const gastosOptimistas = calc.gastosVariablesTotales * 0.9;
-            const contribucionOptimista = (ventaOptimista + calc.costoFinanciero) - (calc.costoMercaderia + gastosOptimistas + calc.comisionTotal + calc.perdidaFinanciera);
-            const margenNetoOptimista = ((ventaOptimista + calc.costoFinanciero) > 0) ? (contribucionOptimista / (ventaOptimista + calc.costoFinanciero)) * 100 : 0;
-            
-            const escenarioOptimista = {
-                nombre: "🚀 Escenario Optimista (+20% precio, -10% costos)",
-                contribucion: contribucionOptimista,
-                margenNeto: margenNetoOptimista,
-                puntoEquilibrio: contribucionOptimista > 0 ? (parseFloat(document.getElementById('gastosFijos').value) || 0) / contribucionOptimista : 999
-            };
-            
-            const ventaPesimista = calc.ventaNeta * 0.8;
-            const gastosPesimistas = calc.gastosVariablesTotales * 1.3;
-            const contribucionPesimista = (ventaPesimista + calc.costoFinanciero) - (calc.costoMercaderia + gastosPesimistas + calc.comisionTotal + calc.perdidaFinanciera);
-            const margenNetoPesimista = ((ventaPesimista + calc.costoFinanciero) > 0) ? (contribucionPesimista / (ventaPesimista + calc.costoFinanciero)) * 100 : 0;
-            
-            const escenarioPesimista = {
-                nombre: "⚠️ Escenario Pesimista (-20% precio, +30% costos)",
-                contribucion: contribucionPesimista,
-                margenNeto: margenNetoPesimista,
-                puntoEquilibrio: contribucionPesimista > 0 ? (parseFloat(document.getElementById('gastosFijos').value) || 0) / contribucionPesimista : 999
-            };
-            
-            return [escenarioBase, escenarioOptimista, escenarioPesimista];
-        }
+        <details>
+          <summary>📊 Gastos Variables (parámetros)</summary>
+          <div class="form-group"><label>Despachante (%)</label><input type="number" id="despachantePorcentaje" value="1.5"></div>
+          <div class="form-group"><label>Flete (USD)</label><input type="number" id="flete" value="2000"></div>
+          <div class="form-group"><label>Seguro (%)</label><input type="number" id="seguroPorcentaje" value="1.5"></div>
+          <div class="form-group"><label>Gastos Varios (%)</label><input type="number" id="gastosVariosPorcentaje" value="2.0"></div>
+          <div class="form-group"><label>IIBB Percepción (%)</label><input type="number" id="ingBrutosPercepcionPorcentaje" value="3.0"></div>
+          <div class="form-group"><label>IIBB Saldo (%)</label><input type="number" id="ingBrutosSaldoPorcentaje" value="3.5"></div>
+          <div class="form-group"><label>Tasa Seguridad (USD)</label><input type="number" id="tasaSeguridad" value="75"></div>
+        </details>
 
-        function generarAlertas(calc) {
-            const alertas = [];
-            
-            if (calc.contribucionNeta <= 0) {
-                alertas.push({
-                    tipo: 'critica',
-                    icono: '🚨',
-                    mensaje: 'Operación genera PÉRDIDAS. Requiere reestructuración inmediata.'
-                });
-            }
-            
-            if (calc.margenNetoPorcentaje < calc.alertas.margenMinimo) {
-                alertas.push({
-                    tipo: 'critica',
-                    icono: '📉',
-                    mensaje: `Margen neto (${calc.margenNetoPorcentaje.toFixed(1)}%) por debajo del mínimo (${calc.alertas.margenMinimo}%).`
-                });
-            }
-            
-            if (calc.puntoEquilibrio > calc.alertas.equilibrioMaximo) {
-                alertas.push({
-                    tipo: 'critica',
-                    icono: '⚡',
-                    mensaje: `Punto equilibrio muy alto: ${calc.puntoEquilibrio.toFixed(1)} operaciones/mes.`
-                });
-            }
-            
-            if (calc.tasaDescuento > calc.alertas.tasaCritica) {
-                alertas.push({
-                    tipo: 'critica',
-                    icono: '💸',
-                    mensaje: `Tasa descuento (${calc.tasaDescuento}%) genera pérdida financiera excesiva.`
-                });
-            }
-            
-            if (calc.margenNetoPorcentaje >= calc.alertas.margenMinimo && calc.margenNetoPorcentaje < calc.alertas.margenMinimo + 5) {
-                alertas.push({
-                    tipo: 'atencion',
-                    icono: '⚠️',
-                    mensaje: 'Margen neto en zona de riesgo. Monitorear de cerca.'
-                });
-            }
-            
-            if (calc.perdidaFinanciera > calc.costoFinanciero * 3) {
-                alertas.push({
-                    tipo: 'atencion',
-                    icono: '💰',
-                    mensaje: 'Pérdida financiera alta. Considerar acortar plazos.'
-                });
-            }
-            
-            if (calc.margenBrutoPorc > calc.alertas.margenExcelente) {
-                alertas.push({
-                    tipo: 'oportunidad',
-                    icono: '🎯',
-                    mensaje: `Excelente margen bruto (${calc.margenBrutoPorc.toFixed(1)}%). Oportunidad de crecimiento.`
-                });
-            }
-            
-            if (calc.puntoEquilibrio < 5) {
-                alertas.push({
-                    tipo: 'oportunidad',
-                    icono: '✅',
-                    mensaje: 'Punto equilibrio muy favorable. Operación altamente escalable.'
-                });
-            }
-            
-            return alertas;
-        }
+        <details>
+          <summary>⚠️ Parámetros de Semáforo y Alertas</summary>
+          <div class="form-group"><label>Margen Neto Mínimo (%)</label><input type="number" id="alertaMargenMinimo" value="15"></div>
+          <div class="form-group"><label>Punto Equilibrio Máximo (u.)</label><input type="number" id="alertaEquilibrioMaximo" value="20"></div>
+          <div class="form-group"><label>Margen Bruto Excelente (%)</label><input type="number" id="alertaMargenExcelente" value="30"></div>
+          <div class="form-group"><label>Tasa Descuento Crítica (%)</label><input type="number" id="alertaTasaCritica" value="35"></div>
+        </details>
+      </div>
 
-        function determinarSemaforo(calc) {
-            let score = 0;
-            
-            if (calc.contribucionNeta > 0) score += 3;
-            if (calc.margenNetoPorcentaje >= calc.alertas.margenMinimo) score += 3;
-            if (calc.puntoEquilibrio <= calc.alertas.equilibrioMaximo) score += 2;
-            if (calc.margenBrutoPorc >= 20) score += 2;
-            
-            if (calc.tasaDescuento > calc.alertas.tasaCritica) score -= 2;
-            if (calc.perdidaFinanciera > calc.costoFinanciero * 4) score -= 1;
-            
-            if (score >= 8) return 'aprobar';
-            if (score >= 5) return 'revisar';
-            return 'rechazar';
-        }
+      <!-- DERECHA -->
+      <div class="results-section">
+        <h2 class="section-title">📊 Resultados</h2>
+        <div id="resultados"><p>Modificá los campos para ver resultados en vivo.</p></div>
+      </div>
+    </div>
+  </div>
 
-        function calcular() {
-            const gastosFijos = parseFloat(document.getElementById('gastosFijos').value) || 0;
-            const iva = parseFloat(document.getElementById('iva').value) || 0;
-            const comisionConcesionario = parseFloat(document.getElementById('comisionConcesionario').value) || 0;
-            
-            const valorFOB = parseFloat(document.getElementById('valorFOB').value) || 0;
-            const valorVenta = parseFloat(document.getElementById('valorVenta').value) || 0;
-            const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
-            const cuotas = parseInt(document.getElementById('cuotas').value) || 1;
-            const tasaFinanciacion = parseFloat(document.getElementById('tasaFinanciacion').value) || 0;
-            const tasaDescuento = parseFloat(document.getElementById('tasaDescuento').value) || 0;
-            const ventaDistribuidor = document.getElementById('ventaDistribuidor').checked;
-            
-            const alertaMargenMinimo = parseFloat(document.getElementById('alertaMargenMinimo').value) || 15;
-            const alertaEquilibrioMaximo = parseFloat(document.getElementById('alertaEquilibrioMaximo').value) || 20;
-            const alertaMargenExcelente = parseFloat(document.getElementById('alertaMargenExcelente').value) || 30;
-            const alertaTasaCritica = parseFloat(document.getElementById('alertaTasaCritica').value) || 35;
-            
-            const despachantePorcentaje = parseFloat(document.getElementById('despachantePorcentaje').value) || 0;
-            const flete = parseFloat(document.getElementById('flete').value) || 0;
-            const seguroPorcentaje = parseFloat(document.getElementById('seguroPorcentaje').value) || 0;
-            const gastosVariosPorcentaje = parseFloat(document.getElementById('gastosVariosPorcentaje').value) || 0;
-            const ingBrutosPercepcionPorcentaje = parseFloat(document.getElementById('ingBrutosPercepcionPorcentaje').value) || 0;
-            const ingBrutosSaldoPorcentaje = parseFloat(document.getElementById('ingBrutosSaldoPorcentaje').value) || 0;
-            const tasaSeguridad = parseFloat(document.getElementById('tasaSeguridad').value) || 0;
+  <script>
+    function formatCurrency(v){return new Intl.NumberFormat('es-US',{style:'currency',currency:'USD'}).format(v)}
+    function formatPercentage(v){return v.toFixed(2)+'%'}
+    function clamp(n){return isFinite(n)?n:0}
 
-            const ventaNeta = valorVenta / (1 + iva / 100);
-            const costoMercaderia = valorFOB;
-            
-            let baseImponible = valorFOB + flete;
-            let seguro = baseImponible * seguroPorcentaje / 100;
-            baseImponible = valorFOB + flete + seguro;
-            seguro = baseImponible * seguroPorcentaje / 100;
-            baseImponible = valorFOB + flete + seguro;
-            
-            const despachante = baseImponible * despachantePorcentaje / 100;
-            const gastosVarios = baseImponible * gastosVariosPorcentaje / 100;
-            const ingBrutosPercepcion = baseImponible * ingBrutosPercepcionPorcentaje / 100;
-            const ingBrutosSaldo = (ventaNeta * ingBrutosSaldoPorcentaje / 100) - ingBrutosPercepcion;
-            
-            const gastosVariablesTotales = despachante + flete + seguro + gastosVarios + 
-                                         ingBrutosPercepcion + ingBrutosSaldo + tasaSeguridad;
-            
-            const comisionTotal = ventaDistribuidor ? (ventaNeta * comisionConcesionario / 100) : 0;
-            const margenBruto = ventaNeta - costoMercaderia - gastosVariablesTotales - comisionTotal;
-            
-            const montoAnticipo = valorVenta * anticipo / 100;
-            const montoFinanciado = valorVenta - montoAnticipo;
-            
-            const tasaMensual = tasaFinanciacion / 100 / 12;
-            const cuotaMensual = cuotas > 0 && tasaMensual > 0 ? 
-                (montoFinanciado * tasaMensual * Math.pow(1 + tasaMensual, cuotas)) / 
-                (Math.pow(1 + tasaMensual, cuotas) - 1) : montoFinanciado / cuotas;
-            
-            const totalCuotasNominal = cuotaMensual * cuotas;
-            const costoFinanciero = totalCuotasNominal - montoFinanciado;
-            
-            const tasaDescuentoMensual = tasaDescuento / 100 / 12;
-            let valorPresenteCuotas = 0;
-            for (let i = 1; i <= cuotas; i++) {
-                valorPresenteCuotas += cuotaMensual / Math.pow(1 + tasaDescuentoMensual, i);
-            }
-            
-            const valorPresenteTotal = montoAnticipo + valorPresenteCuotas;
-            const perdidaFinanciera = totalCuotasNominal - valorPresenteCuotas;
-            const totalCostosGastos = costoMercaderia + gastosVariablesTotales + comisionTotal + perdidaFinanciera;
-            
-            const ingresoTotal = ventaNeta + costoFinanciero;
-            const contribucionNeta = ingresoTotal - totalCostosGastos;
-            
-            const margenBrutoPorc = ventaNeta > 0 ? (margenBruto / ventaNeta) * 100 : 0;
-            const margenNetoPorcentaje = ingresoTotal > 0 ? (contribucionNeta / ingresoTotal) * 100 : 0;
-            const puntoEquilibrio = contribucionNeta > 0 ? gastosFijos / contribucionNeta : 0;
+    function generarAlertas(calc,params){
+      const alertas=[]
+      if(calc.contrib<0) alertas.push({tipo:'critica',msg:'🚨 La operación genera pérdidas.'})
+      if(calc.margenNeto<params.margenMin) alertas.push({tipo:'critica',msg:`📉 Margen neto (${calc.margenNeto.toFixed(1)}%) menor al mínimo (${params.margenMin}%).`})
+      if(calc.puntoEq>params.eqMax) alertas.push({tipo:'critica',msg:`⚡ Punto de equilibrio alto (${calc.puntoEq.toFixed(1)} u.).`})
+      if(calc.tasaDesc>params.tasaCrit) alertas.push({tipo:'critica',msg:`💸 Tasa descuento (${calc.tasaDesc}%) supera el límite crítico (${params.tasaCrit}%).`})
+      if(calc.margenBrutoPct>=params.margenExc) alertas.push({tipo:'oportunidad',msg:`🎯 Excelente margen bruto (${calc.margenBrutoPct.toFixed(1)}%).`})
+      return alertas
+    }
 
-            mostrarResultados({
-                ventaNeta,
-                costoMercaderia,
-                gastosVariablesTotales,
-                comisionTotal,
-                margenBruto,
-                contribucionNeta,
-                valorPresenteTotal,
-                margenBrutoPorc,
-                margenNetoPorcentaje,
-                puntoEquilibrio,
-                cuotaMensual,
-                montoAnticipo,
-                montoFinanciado,
-                ventaDistribuidor,
-                costoFinanciero,
-                totalCuotasNominal,
-                perdidaFinanciera,
-                totalCostosGastos,
-                ingresoTotal,
-                valorVenta: valorVenta, // Agregamos valor con IVA para el markup
-                baseImponible,
-                tasaDescuento,
-                alertas: {
-                    margenMinimo: alertaMargenMinimo,
-                    equilibrioMaximo: alertaEquilibrioMaximo,
-                    margenExcelente: alertaMargenExcelente,
-                    tasaCritica: alertaTasaCritica
-                },
-                desglose: {
-                    despachante,
-                    flete,
-                    seguro,
-                    gastosVarios,
-                    ingBrutosPercepcion,
-                    ingBrutosSaldo,
-                    tasaSeguridad
-                },
-                porcentajes: {
-                    despachantePorcentaje,
-                    seguroPorcentaje,
-                    gastosVariosPorcentaje,
-                    ingBrutosPercepcionPorcentaje,
-                    ingBrutosSaldoPorcentaje
-                }
-            });
-        }
+    function calcular(){
+      // INPUTS
+      const valorFOB=+document.getElementById('valorFOB').value||0
+      const valorVenta=+document.getElementById('valorVenta').value||0
+      const anticipo=+document.getElementById('anticipo').value||0
+      const cuotas=+document.getElementById('cuotas').value||1
+      const tasaFin=+document.getElementById('tasaFinanciacion').value||0
+      const tasaDesc=+document.getElementById('tasaDescuento').value||0
+      const gastosFijos=+document.getElementById('gastosFijos').value||0
+      const iva=+document.getElementById('iva').value||0
+      const comision=+document.getElementById('comisionConcesionario').value||0
+      const despP=+document.getElementById('despachantePorcentaje').value||0
+      const flete=+document.getElementById('flete').value||0
+      const segP=+document.getElementById('seguroPorcentaje').value||0
+      const gvP=+document.getElementById('gastosVariosPorcentaje').value||0
+      const iibbP=+document.getElementById('ingBrutosPercepcionPorcentaje').value||0
+      const iibbSaldoP=+document.getElementById('ingBrutosSaldoPorcentaje').value||0
+      const tasaSeg=+document.getElementById('tasaSeguridad').value||0
+      const ventaDist=document.getElementById('ventaDistribuidor').checked
 
-        function mostrarResultados(calc) {
-            const resultadosDiv = document.getElementById('resultados');
-            
-            const alertas = generarAlertas(calc);
-            const decision = determinarSemaforo(calc);
-            
-            const rentabilidadBuena = calc.margenNetoPorcentaje > 15;
-            const equilibrioRazonable = calc.puntoEquilibrio < 10;
-            const margenSaludable = calc.margenBrutoPorc > 20;
-            
-            let analisis1, analisis2, analisis3;
-            
-            if (rentabilidadBuena && margenSaludable) {
-                analisis1 = "📈 <strong>Rentabilidad Sólida:</strong> Margen neto del " + calc.margenNetoPorcentaje.toFixed(1) + "% indica una operación financieramente atractiva con contribución positiva al flujo de caja.";
-            } else if (calc.contribucionNeta > 0) {
-                analisis1 = "⚠️ <strong>Rentabilidad Ajustada:</strong> Operación viable pero con márgenes comprometidos. Evaluar optimización de costos variables o ajuste de precios.";
-            } else {
-                analisis1 = "🚨 <strong>Alerta Financiera:</strong> Operación genera pérdidas. Requiere reestructuración inmediata de costos o reconsiderar viabilidad comercial.";
-            }
-            
-            if (equilibrioRazonable) {
-                analisis2 = "✅ <strong>Escalabilidad Positiva:</strong> Con " + calc.puntoEquilibrio.toFixed(1) + " operaciones mensuales cubrimos gastos fijos. Meta alcanzable para estructura actual.";
-            } else if (calc.puntoEquilibrio < 20) {
-                analisis2 = "⚡ <strong>Desafío Operativo:</strong> Necesitamos " + calc.puntoEquilibrio.toFixed(1) + " operaciones/mes para equilibrio. Revisar capacidad comercial y estrategia de volumen.";
-            } else {
-                analisis2 = "🎯 <strong>Revisión Estratégica:</strong> Punto de equilibrio elevado (" + calc.puntoEquilibrio.toFixed(1) + " ops/mes). Considerar reestructuración de gastos fijos o modelo comercial.";
-            }
-            
-            if (calc.perdidaFinanciera > calc.costoFinanciero * 2) {
-                analisis3 = "💰 <strong>Oportunidad Financiera:</strong> Tasa de descuento genera pérdida significativa. Evaluar acortar plazos de cobro o ajustar política de financiación.";
-            } else if (calc.margenBrutoPorc > 25) {
-                analisis3 = "🚀 <strong>Posición Competitiva:</strong> Margen bruto robusto (" + calc.margenBrutoPorc.toFixed(1) + "%) sugiere pricing power. Oportunidad para incrementar volumen manteniendo rentabilidad.";
-            } else {
-                analisis3 = "🎲 <strong>Gestión de Márgenes:</strong> Operación en rango estándar. Monitorear competencia y evaluar oportunidades de diferenciación para proteger rentabilidad.";
-            }
-            
-            resultadosDiv.innerHTML = `
-                <div class="semaforo-container">
-                    <div class="semaforo-item semaforo-aprobar ${decision === 'aprobar' ? 'semaforo-activo' : ''}">
-                        <div class="semaforo-icon">🟢</div>
-                        <div class="semaforo-text">Aprobar</div>
-                    </div>
-                    <div class="semaforo-item semaforo-revisar ${decision === 'revisar' ? 'semaforo-activo' : ''}">
-                        <div class="semaforo-icon">🟡</div>
-                        <div class="semaforo-text">Revisar</div>
-                    </div>
-                    <div class="semaforo-item semaforo-rechazar ${decision === 'rechazar' ? 'semaforo-activo' : ''}">
-                        <div class="semaforo-icon">🔴</div>
-                        <div class="semaforo-text">Rechazar</div>
-                    </div>
-                </div>
+      const params={
+        margenMin:+document.getElementById('alertaMargenMinimo').value||15,
+        eqMax:+document.getElementById('alertaEquilibrioMaximo').value||20,
+        margenExc:+document.getElementById('alertaMargenExcelente').value||30,
+        tasaCrit:+document.getElementById('alertaTasaCritica').value||35
+      }
 
-                ${alertas.length > 0 ? `
-                <div class="alertas-container">
-                    ${alertas.map(alerta => `
-                        <div class="alerta alerta-${alerta.tipo}">
-                            <span>${alerta.icono}</span>
-                            <span>${alerta.mensaje}</span>
-                        </div>
-                    `).join('')}
-                </div>
-                ` : ''}
+      // VENTAS
+      const ventaNeta = valorVenta/(1+iva/100)
+      const costoMerc = valorFOB
 
-                <div class="summary-metrics">
-                    <div class="metric-card">
-                        <div class="metric-label">Contribución Neta</div>
-                        <div class="metric-value ${calc.contribucionNeta < 0 ? 'negative' : ''}">${formatCurrency(calc.contribucionNeta)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Margen Bruto %</div>
-                        <div class="metric-value">${formatPercentage(calc.margenBrutoPorc)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Margen Neto %</div>
-                        <div class="metric-value">${formatPercentage(calc.margenNetoPorcentaje)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Punto de Equilibrio</div>
-                        <div class="metric-value">${calc.puntoEquilibrio.toFixed(2)} unidades</div>
-                    </div>
-                </div>
+      // BASE y SEGURO iterativo
+      let base = valorFOB + flete
+      let seguro = base*segP/100
+      base = valorFOB + flete + seguro
+      seguro = base*segP/100
+      base = valorFOB + flete + seguro
 
-                <div class="result-breakdown">
-                    <h3>📋 Resumen del Negocio</h3>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Valor FOB:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.costoMercaderia)}</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Valor de Venta (CON IVA):</span>
-                        <span class="breakdown-value">${formatCurrency(calc.valorVenta)}</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Markup sobre FOB:</span>
-                        <span class="breakdown-value">${((calc.valorVenta / calc.costoMercaderia) * 100).toFixed(1)}%</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Gastos Variables Totales:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.gastosVariablesTotales)}</span>
-                    </div>
-                    ${calc.ventaDistribuidor ? `
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Comisión Distribuidor:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.comisionTotal)}</span>
-                    </div>
-                    ` : ''}
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Costo Financiero:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.costoFinanciero)}</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Pérdida por Descuento:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.perdidaFinanciera)}</span>
-                    </div>
-                    <div style="margin: 15px 0; padding: 15px 0; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
-                        <div style="font-weight: bold; color: #3498db; margin-bottom: 10px; font-size: 1rem;">💳 Forma de Pago</div>
-                        <div class="breakdown-item" style="border-bottom: none; padding: 4px 0;">
-                            <span class="breakdown-label">Anticipo:</span>
-                            <span class="breakdown-value">${formatCurrency(calc.montoAnticipo)}</span>
-                        </div>
-                        <div class="breakdown-item" style="border-bottom: none; padding: 4px 0;">
-                            <span class="breakdown-label">Cuota Mensual:</span>
-                            <span class="breakdown-value">${formatCurrency(calc.cuotaMensual)}</span>
-                        </div>
-                    </div>
-                    <div class="breakdown-item" style="border-top: 2px solid #3498db; padding-top: 12px; margin-top: 8px; font-weight: bold;">
-                        <span class="breakdown-label">Total Ingresos:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.ingresoTotal)}</span>
-                    </div>
-                    <div class="breakdown-item" style="border-bottom: none;">
-                        <span class="breakdown-label">Total Costos:</span>
-                        <span class="breakdown-value">${formatCurrency(calc.totalCostosGastos)}</span>
-                    </div>
-                </div>
+      // GASTOS VARIABLES
+      const desp = base*despP/100
+      const gv  = base*gvP/100
+      const iibbPerc = base*iibbP/100
+      const iibbSaldo = Math.max(0,(ventaNeta*iibbSaldoP/100) - iibbPerc)
+      const gastosVar = desp + flete + seguro + gv + iibbPerc + iibbSaldo + tasaSeg
 
-                <div class="result-breakdown">
-                    <h3>🎯 Análisis Ejecutivo - Perspectiva CFO</h3>
-                    <div style="margin-bottom: 12px; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; border-radius: 8px; font-size: 0.95rem; line-height: 1.5;">
-                        ${analisis1}
-                    </div>
-                    <div style="margin-bottom: 12px; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; border-radius: 8px; font-size: 0.95rem; line-height: 1.5;">
-                        ${analisis2}
-                    </div>
-                    <div style="margin-bottom: 0; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; border-radius: 8px; font-size: 0.95rem; line-height: 1.5;">
-                        ${analisis3}
-                    </div>
-                </div>
-            `;
-        }
+      // COMISIÓN
+      const comisionTot = ventaDist ? ventaNeta*comision/100 : 0
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(this.timeout);
-                    this.timeout = setTimeout(calcular, 500);
-                });
-            });
-            
-            calcular();
-        });
-    </script>
+      // MARGEN BRUTO
+      const margenBrutoMonto = ventaNeta - costoMerc - gastosVar - comisionTot
+      const margenBrutoPct = ventaNeta>0 ? (margenBrutoMonto/ventaNeta)*100 : 0
+
+      // FINANCIACIÓN
+      const montoAnt = valorVenta*anticipo/100
+      const montoFin = valorVenta - montoAnt
+      const tasaM    = tasaFin/100/12
+      let cuota = 0
+      if (cuotas>0){
+        cuota = (tasaM===0) ? (montoFin/cuotas)
+                : (montoFin*tasaM*Math.pow(1+tasaM,cuotas))/(Math.pow(1+tasaM,cuotas)-1)
+      }
+      const totalCuotas = cuota*cuotas
+      const costoFin    = totalCuotas - montoFin
+
+      // DESCUENTO (VP)
+      const tasaDescM   = tasaDesc/100/12
+      let vp = 0
+      for (let i=1;i<=cuotas;i++){ vp += cuota/Math.pow(1+tasaDescM,i) }
+      const perdidaFin  = totalCuotas - vp
+
+      // RESULTADOS
+      const ingresoTot  = ventaNeta + costoFin
+      const totalCostos = costoMerc + gastosVar + comisionTot + perdidaFin
+      const contrib     = ingresoTot - totalCostos
+      const margenNeto  = ingresoTot>0 ? (contrib/ingresoTot)*100 : 0
+      const puntoEq     = contrib>0 ? (gastosFijos/contrib) : 999
+
+      // DECISIÓN
+      let decision='rechazar'
+      if(contrib>0 && margenNeto>=params.margenMin && puntoEq<=params.eqMax){ decision='aprobar' }
+      else if(contrib>0){ decision='revisar' }
+
+      // ALERTAS
+      const alertas = generarAlertas(
+        {contrib,margenNeto,puntoEq,tasaDesc,margenBrutoPct},
+        params
+      )
+
+      // % barra anticipo (cap 100)
+      const advPct = Math.max(0,Math.min(100,anticipo||0))
+
+      // RENDER
+      document.getElementById('resultados').innerHTML = `
+        <div class="semaforo-container">
+          <div class="semaforo-item semaforo-aprobar ${decision==='aprobar'?'semaforo-activo':''}">🟢 Aprobar</div>
+          <div class="semaforo-item semaforo-revisar ${decision==='revisar'?'semaforo-activo':''}">🟡 Revisar</div>
+          <div class="semaforo-item semaforo-rechazar ${decision==='rechazar'?'semaforo-activo':''}">🔴 Rechazar</div>
+        </div>
+
+        <div class="alertas-container">
+          ${alertas.map(a=>`<div class="alerta ${a.tipo}">${a.msg}</div>`).join('')}
+        </div>
+
+        <div class="summary-metrics">
+          <div class="metric-card"><div class="metric-label">Contribución</div><div class="metric-value">${formatCurrency(contrib)}</div></div>
+          <div class="metric-card"><div class="metric-label">Margen Bruto %</div><div class="metric-value">${formatPercentage(margenBrutoPct)}</div></div>
+          <div class="metric-card"><div class="metric-label">Margen Neto %</div><div class="metric-value">${formatPercentage(margenNeto)}</div></div>
+          <div class="metric-card"><div class="metric-label">Punto de Equilibrio</div><div class="metric-value">${clamp(puntoEq).toFixed(2)} u.</div></div>
+        </div>
+
+        <!-- Forma de pago (alineada al resto) -->
+        <div class="paycard">
+          <div class="pay-header">
+            <div class="pay-title">💳 Forma de Pago</div>
+            <div class="pay-chips">
+              <span class="chip">Anticipo ${anticipo.toFixed(0)}%</span>
+              <span class="chip">${cuotas} cuotas</span>
+              <span class="chip">TNA ${tasaFin.toFixed(1)}%</span>
+              <span class="chip">Tasa desc. ${tasaDesc.toFixed(1)}%</span>
+            </div>
+          </div>
+          <div class="pay-grid">
+            <div class="kpi"><div class="label">Venta Total</div><div class="value">${formatCurrency(valorVenta)}</div></div>
+            <div class="kpi"><div class="label">Anticipo</div><div class="value">${formatCurrency(montoAnt)}</div></div>
+            <div class="kpi"><div class="label">Financiado</div><div class="value">${formatCurrency(montoFin)}</div></div>
+            <div class="kpi"><div class="label">Cuota</div><div class="value">${formatCurrency(cuota)}</div></div>
+          </div>
+          <div class="pay-progress" aria-label="Porcentaje de anticipo"><div class="adv" style="width:${advPct}%;"></div></div>
+        </div>
+
+        <!-- Estado de resultados -->
+        <div class="card">
+          <h3>📊 Estado de Resultados</h3>
+          <table class="er-table">
+            <tr><th colspan="2">INGRESOS</th></tr>
+            <tr><td class="label">Venta Neta</td><td>${formatCurrency(ventaNeta)}</td></tr>
+            <tr><td class="label">Costo Financiero</td><td>${formatCurrency(costoFin)}</td></tr>
+            <tr class="er-total"><td class="label">Total Ingresos</td><td>${formatCurrency(ingresoTot)}</td></tr>
+
+            <tr><th colspan="2">COSTOS Y GASTOS</th></tr>
+            <tr><td class="label">FOB</td><td>${formatCurrency(costoMerc)}</td></tr>
+            <tr><td class="label">Gastos Variables</td><td>${formatCurrency(gastosVar)}</td></tr>
+            ${ventaDist?`<tr><td class="label">Comisión Distribuidor</td><td>${formatCurrency(comisionTot)}</td></tr>`:''}
+            <tr><td class="label">Pérdida Financiera (descuento)</td><td>${formatCurrency(perdidaFin)}</td></tr>
+            <tr class="er-total"><td class="label">Total Costos</td><td>${formatCurrency(totalCostos)}</td></tr>
+
+            <tr class="er-final ${contrib<0?'neg':''}"><td class="label">Resultado Neto (Contribución)</td><td>${formatCurrency(contrib)}</td></tr>
+          </table>
+        </div>
+
+        <!-- Gastos variables: acordeón en la derecha -->
+        <details class="card">
+          <summary>🔍 Detalle de Gastos Variables</summary>
+          <div class="breakdown-item"><span>Base imponible (FOB + Flete + Seguro)</span><span>${formatCurrency(base)}</span></div>
+          <div class="breakdown-item"><span>Despachante (${despP}%)</span><span>${formatCurrency(desp)}</span></div>
+          <div class="breakdown-item"><span>Flete</span><span>${formatCurrency(flete)}</span></div>
+          <div class="breakdown-item"><span>Seguro (${segP}%)</span><span>${formatCurrency(seguro)}</span></div>
+          <div class="breakdown-item"><span>Gastos varios (${gvP}%)</span><span>${formatCurrency(gv)}</span></div>
+          <div class="breakdown-item"><span>IIBB Percepción (${iibbP}%)</span><span>${formatCurrency(iibbPerc)}</span></div>
+          <div class="breakdown-item"><span>IIBB Saldo (${iibbSaldoP}%)</span><span>${formatCurrency(iibbSaldo)}</span></div>
+          <div class="breakdown-item"><span>Tasa de seguridad</span><span>${formatCurrency(tasaSeg)}</span></div>
+        </details>
+      `
+    }
+
+    // Auto-recalcular con debounce
+    document.addEventListener('DOMContentLoaded',()=>{
+      const inputs=document.querySelectorAll('input')
+      inputs.forEach(inp=>{
+        inp.addEventListener('input',()=>{
+          clearTimeout(inp.__t); inp.__t=setTimeout(calcular,320)
+        })
+      })
+      calcular()
+    })
+  </script>
 </body>
 </html>
